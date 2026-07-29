@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hân Trương ❤️</title>
+
+    <!-- Google Font: Poppins -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+      /* ============================
+       RESET & BASE
+    ============================ */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --purple: #7b2ff7;
+        --violet: #a855f7;
+        --pink: #ec4899;
+        --rose: #f43f5e;
+        --cyan: #06b6d4;
+        --glow: 0 0 20px #a855f7, 0 0 40px #7b2ff7, 0 0 80px #ec4899;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Poppins", sans-serif;
+        background: #000;
+        color: #fff;
+      }
+
+      /* ============================
+       THREE.JS CANVAS (full screen)
+    ============================ */
+      #three-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      /* ============================
+       TWINKLING STARS OVERLAY
+    ============================ */
+      #stars-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      /* ============================
+       FLOATING HEARTS
+    ============================ */
+      .floating-heart {
+        position: fixed;
+        bottom: -60px;
+        font-size: 1.8rem;
+        animation: floatUp 6s ease-in forwards;
+        pointer-events: none;
+        z-index: 2;
+        filter: drop-shadow(0 0 10px #ec4899);
+      }
+
+      @keyframes floatUp {
+        0% {
+          transform: translateY(0) scale(0.8) rotate(-10deg);
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(-45vh) scale(1.1) rotate(10deg);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translateY(-100vh) scale(0.6) rotate(-5deg);
+          opacity: 0;
+        }
+      }
+
+      /* ============================
+       MAIN UI CONTAINER (Glassmorphism)
+    ============================ */
+      #ui {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        /* subtle vignette */
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0) 40%,
+          rgba(0, 0, 0, 0.55) 100%
+        );
+      }
+
+      /* The main card */
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(18px) saturate(1.5);
+        -webkit-backdrop-filter: blur(18px) saturate(1.5);
+        border: 1px solid rgba(168, 85, 247, 0.35);
+        border-radius: 28px;
+        padding: 44px 48px 40px;
+        max-width: 620px;
+        width: 100%;
+        text-align: center;
+        box-shadow:
+          0 0 40px rgba(123, 47, 247, 0.25),
+          0 0 80px rgba(236, 72, 153, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        animation: fadeIn 1.2s ease both;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* ============================
+       TYPEWRITER TEXT AREA
+    ============================ */
+      #typewriter-area {
+        min-height: 130px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .type-line {
+        font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .type-line.visible {
+        opacity: 1;
+      }
+
+      /* The blinking cursor */
+      .cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.1em;
+        background: #a855f7;
+        margin-left: 2px;
+        vertical-align: text-bottom;
+        animation: blink 0.8s step-end infinite;
+        border-radius: 1px;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ============================
+       QUESTION LINE
+    ============================ */
+      #question {
+        margin-top: 22px;
+        font-size: clamp(1rem, 3vw, 1.4rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #f43f5e, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
+        filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.6));
+        opacity: 0;
+        transform: scale(0.85);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+
+      #question.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* ============================
+       BUTTONS
+    ============================ */
+      #btns {
+        display: flex;
+        gap: 18px;
+        margin-top: 28px;
+        justify-content: center;
+        flex-wrap: wrap;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+      }
+
+      #btns.visible {
+        opacity: 1;
+      }
+
+      .btn {
+        padding: 14px 32px;
+        border: none;
+        border-radius: 50px;
+        font-family: "Poppins", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Yes button */
+      #btn-yes {
+        background: linear-gradient(135deg, #ec4899, #a855f7);
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);
+      }
+
+      #btn-yes:hover {
+        transform: scale(1.07);
+        box-shadow:
+          0 6px 30px rgba(236, 72, 153, 0.75),
+          0 0 40px rgba(168, 85, 247, 0.5);
+      }
+
+      #btn-yes:active {
+        transform: scale(0.98);
+      }
+
+      /* No button — starts normal, then runs away */
+      #btn-no {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      #btn-no:hover {
+        transform: scale(1.04);
+      }
+
+      /* ============================
+       SUCCESS MESSAGE
+    ============================ */
+      #success-msg {
+        display: none;
+        font-size: clamp(1.6rem, 5vw, 2.8rem);
+        font-weight: 900;
+        text-align: center;
+        margin-top: 28px;
+        background: linear-gradient(
+          90deg,
+          #f43f5e,
+          #ec4899,
+          #a855f7,
+          #7b2ff7,
+          #ec4899
+        );
+        background-size: 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation:
+          shimmer 3s linear infinite,
+          popIn 0.6s ease both;
+        filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.8));
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 300% 50%;
+        }
+      }
+
+      @keyframes popIn {
+        0% {
+          transform: scale(0.4) rotate(-5deg);
+          opacity: 0;
+        }
+        70% {
+          transform: scale(1.1) rotate(2deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+
+      /* ============================
+       SCREEN FLASH OVERLAY
+    ============================ */
+      #flash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(236, 72, 153, 0.85) 0%,
+          rgba(168, 85, 247, 0.6) 40%,
+          rgba(123, 47, 247, 0.3) 70%,
+          transparent 100%
+        );
+      }
+
+      /* ============================
+       CONFETTI CANVAS
+    ============================ */
+      #confetti-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 998;
+        pointer-events: none;
+      }
+
+      /* ============================
+       DIVIDER / DECORATION
+    ============================ */
+      .deco-line {
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #a855f7, transparent);
+        margin: 18px auto;
+        border-radius: 2px;
+      }
+
+      /* ============================
+       RESPONSIVE
+    ============================ */
+      @media (max-width: 480px) {
+        .card {
+          padding: 30px 22px 28px;
+          border-radius: 20px;
+        }
+
+        #btns {
+          gap: 12px;
+        }
+
+        .btn {
+          padding: 12px 24px;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================================================
+     THREE.JS CANVAS — 3D Heart Particles
+============================================================ -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- ============================================================
+     TWINKLING STARS — 2D Canvas overlay
+============================================================ -->
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- ============================================================
+     CONFETTI CANVAS
+============================================================ -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ============================================================
+     SCREEN FLASH OVERLAY
+============================================================ -->
+    <div id="flash"></div>
+
+    <!-- ============================================================
+     MAIN UI
+============================================================ -->
+    <div id="ui">
+      <div class="card">
+        <!-- Typewriter text area -->
+        <div id="typewriter-area">
+          <!-- Lines will be injected by JS -->
+        </div>
+
+        <div class="deco-line"></div>
+
+        <!-- Proposal question -->
+        <div id="question">
+          Hân Trương, em có đồng ý làm người yêu anh không? ❤️
+        </div>
+
+        <!-- Action buttons -->
+        <div id="btns">
+          <button class="btn" id="btn-yes" onclick="handleYes()">
+            💖 Đồng ý
+          </button>
+          <button class="btn" id="btn-no" id="btn-no">💔 Để em suy nghĩ</button>
+        </div>
+
+        <!-- Success message (hidden until Yes) -->
+        <div id="success-msg">Yêu em rất nhiều ❤️</div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+     AUDIO — Replace the src with your MP3 link
+============================================================ -->
+    <audio id="bg-music" loop autoplay preload="auto">
+      <!-- 🎵 Thay link MP3 vào đây -->
+      <source src="YOUR_MP3_LINK_HERE.mp3" type="audio/mpeg" />
+    </audio>
+
+    <script>
+      /* ================================================================
+   CONFIGURATION
+================================================================ */
+      const MUSIC_SRC = "YOUR_MP3_LINK_HERE.mp3"; // 🎵 Đặt link MP3 vào đây
+
+      /* ================================================================
+   1. THREE.JS — 3D HEART PARTICLES
+================================================================ */
+      (function initThree() {
+        const canvas = document.getElementById("three-canvas");
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true,
+          alpha: true,
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0); // transparent background
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000,
+        );
+        camera.position.set(0, 0, 5);
+
+        /* --- Background galaxy gradient fog --- */
+        scene.fog = new THREE.FogExp2(0x050010, 0.035);
+
+        /* --- Deep space background particles --- */
+        const bgCount = 4000;
+        const bgGeo = new THREE.BufferGeometry();
+        const bgPos = new Float32Array(bgCount * 3);
+        const bgColors = new Float32Array(bgCount * 3);
+
+        for (let i = 0; i < bgCount; i++) {
+          bgPos[i * 3] = (Math.random() - 0.5) * 80;
+          bgPos[i * 3 + 1] = (Math.random() - 0.5) * 80;
+          bgPos[i * 3 + 2] = (Math.random() - 0.5) * 80;
+
+          // Subtle purple/blue/white tones
+          const t = Math.random();
+          bgColors[i * 3] = 0.4 + t * 0.6;
+          bgColors[i * 3 + 1] = 0.1 + t * 0.3;
+          bgColors[i * 3 + 2] = 0.8 + t * 0.2;
+        }
+
+        bgGeo.setAttribute("position", new THREE.BufferAttribute(bgPos, 3));
+        bgGeo.setAttribute("color", new THREE.BufferAttribute(bgColors, 3));
+
+        const bgMat = new THREE.PointsMaterial({
+          size: 0.06,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.7,
+          sizeAttenuation: true,
+        });
+
+        scene.add(new THREE.Points(bgGeo, bgMat));
+
+        /* --- Heart formula (parametric) --- */
+        function heartPoint(t, phi) {
+          // Heart shape in 3D — parametric surface
+          const x = 16 * Math.pow(Math.sin(t), 3);
+          const y =
+            13 * Math.cos(t) -
+            5 * Math.cos(2 * t) -
+            2 * Math.cos(3 * t) -
+            Math.cos(4 * t);
+          const z = 6 * Math.sin(phi) * Math.abs(Math.sin(t));
+          return [x * 0.065, y * 0.065, z * 0.1];
+        }
+
+        /* --- Heart particles --- */
+        const HEART_COUNT = 3500;
+        const heartGeo = new THREE.BufferGeometry();
+        const heartPos = new Float32Array(HEART_COUNT * 3);
+        const heartColors = new Float32Array(HEART_COUNT * 3);
+        const heartSizes = new Float32Array(HEART_COUNT);
+        const phases = new Float32Array(HEART_COUNT); // animation phase
+
+        for (let i = 0; i < HEART_COUNT; i++) {
+          const t = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI * 2;
+          const [x, y, z] = heartPoint(t, phi);
+
+          // Scatter a bit around the surface
+          const scatter = 0.03;
+          heartPos[i * 3] = x + (Math.random() - 0.5) * scatter;
+          heartPos[i * 3 + 1] = y + (Math.random() - 0.5) * scatter;
+          heartPos[i * 3 + 2] = z + (Math.random() - 0.5) * scatter;
+
+          // Gradient: pink → violet → deep purple
+          const c = Math.random();
+          heartColors[i * 3] = 0.85 + c * 0.15; // R
+          heartColors[i * 3 + 1] = 0.1 + c * 0.35; // G
+          heartColors[i * 3 + 2] = 0.5 + c * 0.5; // B
+
+          heartSizes[i] = 0.015 + Math.random() * 0.025;
+          phases[i] = Math.random() * Math.PI * 2;
+        }
+
+        heartGeo.setAttribute(
+          "position",
+          new THREE.BufferAttribute(heartPos, 3),
+        );
+        heartGeo.setAttribute(
+          "color",
+          new THREE.BufferAttribute(heartColors, 3),
+        );
+        heartGeo.setAttribute("size", new THREE.BufferAttribute(heartSizes, 1));
+
+        /* Custom shader material for glowing points */
+        const heartMat = new THREE.ShaderMaterial({
+          uniforms: {
+            time: { value: 0 },
+            glowColor: { value: new THREE.Color(0xec4899) },
+            glowBoost: { value: 0.0 }, // animated to 1.0 on "Yes"
+          },
+          vertexShader: `
+      attribute float size;
+      attribute vec3 color;
+      varying vec3 vColor;
+      uniform float time;
+      uniform float glowBoost;
+      void main() {
+        vColor = color;
+        vec3 pos = position;
+        // Subtle breathing pulse
+        float pulse = sin(time * 1.4 + pos.x * 3.0 + pos.y * 2.0) * 0.035;
+        pos += normalize(pos) * pulse;
+        // Amplified pulse on glow boost
+        pos += normalize(pos) * glowBoost * 0.12;
+
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        gl_PointSize = size * (320.0 / -mvPos.z) * (1.0 + glowBoost * 0.6);
+        gl_Position  = projectionMatrix * mvPos;
+      }
+    `,
+          fragmentShader: `
+      varying vec3 vColor;
+      uniform float glowBoost;
+      void main() {
+        // Radial soft dot
+        float d = length(gl_PointCoord - vec2(0.5));
+        if (d > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.0, d);
+        vec3 col = vColor + vec3(glowBoost * 0.4, 0.0, glowBoost * 0.15);
+        gl_FragColor = vec4(col, alpha * (0.85 + glowBoost * 0.15));
+      }
+    `,
+          transparent: true,
+          vertexColors: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
+
+        const heartMesh = new THREE.Points(heartGeo, heartMat);
+        scene.add(heartMesh);
+
+        /* --- Mouse influence --- */
+        let mouseX = 0,
+          mouseY = 0;
+        document.addEventListener("mousemove", (e) => {
+          mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+          mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        /* Touch support */
+        document.addEventListener(
+          "touchmove",
+          (e) => {
+            const t = e.touches[0];
+            mouseX = (t.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = (t.clientY / window.innerHeight - 0.5) * 2;
+          },
+          { passive: true },
+        );
+
+        /* --- Resize --- */
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        /* --- Animation loop --- */
+        let clock = new THREE.Clock();
+        let glowTarget = 0;
+
+        window.triggerHeartGlow = function () {
+          glowTarget = 1;
+        };
+
+        function animate() {
+          requestAnimationFrame(animate);
+          const elapsed = clock.getElapsedTime();
+
+          heartMat.uniforms.time.value = elapsed;
+
+          // Smooth glow interpolation
+          heartMat.uniforms.glowBoost.value +=
+            (glowTarget - heartMat.uniforms.glowBoost.value) * 0.02;
+
+          // Gentle auto-rotation + mouse tilt
+          heartMesh.rotation.y = elapsed * 0.3 + mouseX * 0.4;
+          heartMesh.rotation.x = Math.sin(elapsed * 0.2) * 0.15 - mouseY * 0.2;
+
+          // Slow background rotation
+          scene.rotation.y = elapsed * 0.03;
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      })();
+
+      /* ================================================================
+   2. TWINKLING STARS — 2D Canvas
+================================================================ */
+      (function initStars() {
+        const canvas = document.getElementById("stars-canvas");
+        const ctx = canvas.getContext("2d");
+        let W = (canvas.width = window.innerWidth);
+        let H = (canvas.height = window.innerHeight);
+
+        const STAR_COUNT = 180;
+        const stars = Array.from({ length: STAR_COUNT }, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.3,
+          a: Math.random(), // current alpha
+          da: (Math.random() - 0.5) * 0.015, // delta alpha
+          hue: Math.random() < 0.5 ? 270 : 320, // purple or pink
+        }));
+
+        window.addEventListener("resize", () => {
+          W = canvas.width = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+        });
+
+        function drawStars() {
+          ctx.clearRect(0, 0, W, H);
+          for (const s of stars) {
+            s.a += s.da;
+            if (s.a > 1 || s.a < 0) s.da *= -1;
+
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${s.hue}, 90%, 80%, ${Math.max(0, s.a)})`;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = `hsla(${s.hue}, 90%, 80%, 0.8)`;
+            ctx.fill();
+          }
+          requestAnimationFrame(drawStars);
+        }
+        drawStars();
+      })();
+
+      /* ================================================================
+   3. FLOATING HEARTS — spawned every 3 s
+================================================================ */
+      (function initFloatingHearts() {
+        const emojis = ["❤️", "💜", "💖", "💗", "💝", "💕", "🌸"];
+
+        function spawnHeart() {
+          const el = document.createElement("div");
+          el.className = "floating-heart";
+          el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          el.style.left = 5 + Math.random() * 90 + "vw";
+          el.style.fontSize = 1.2 + Math.random() * 1.4 + "rem";
+          el.style.animationDuration = 4 + Math.random() * 4 + "s";
+          el.style.animationDelay = "0s";
+          document.body.appendChild(el);
+          el.addEventListener("animationend", () => el.remove());
+        }
+
+        // Start spawning after 2 s
+        setTimeout(() => {
+          spawnHeart();
+          setInterval(spawnHeart, 2800);
+        }, 2000);
+      })();
+
+      /* ================================================================
+   4. TYPEWRITER SEQUENCE
+================================================================ */
+      const LINES = [
+        { text: "Xin chào Hân Trương ❤️", delay: 800 },
+        {
+          text: "Có lẽ đây không phải lời tỏ tình hoàn hảo nhất...",
+          delay: 3200,
+        },
+        {
+          text: "...nhưng là tất cả những gì trái tim anh muốn nói.",
+          delay: 2600,
+        },
+      ];
+
+      const area = document.getElementById("typewriter-area");
+      let lineIndex = 0;
+
+      function typeLine(text, container, speed, onDone) {
+        let i = 0;
+        const cursor = document.createElement("span");
+        cursor.className = "cursor";
+        container.appendChild(cursor);
+
+        const interval = setInterval(() => {
+          cursor.insertAdjacentText("beforebegin", text[i]);
+          i++;
+          if (i >= text.length) {
+            clearInterval(interval);
+            setTimeout(() => {
+              cursor.remove();
+              if (onDone) onDone();
+            }, 500);
+          }
+        }, speed);
+      }
+
+      function showNextLine() {
+        if (lineIndex >= LINES.length) {
+          // All lines done — reveal question + buttons
+          setTimeout(revealQuestion, 600);
+          return;
+        }
+
+        const { text, delay } = LINES[lineIndex++];
+
+        const line = document.createElement("p");
+        line.className = "type-line";
+        area.appendChild(line);
+
+        // Small fade-in
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => line.classList.add("visible"));
+        });
+
+        setTimeout(() => {
+          typeLine(text, line, 55, () => {
+            setTimeout(showNextLine, 400);
+          });
+        }, 200);
+      }
+
+      // Kick off after page loads
+      window.addEventListener("load", () => {
+        setTimeout(showNextLine, LINES[0].delay - 600);
+      });
+
+      function revealQuestion() {
+        const q = document.getElementById("question");
+        q.classList.add("visible");
+        setTimeout(() => {
+          document.getElementById("btns").classList.add("visible");
+        }, 600);
+      }
+
+      /* ================================================================
+   5. BUTTON: YES
+================================================================ */
+      function handleYes() {
+        // Disable buttons
+        document.getElementById("btns").style.pointerEvents = "none";
+
+        // 1. Screen flash
+        flashScreen();
+
+        // 2. Heart glow
+        window.triggerHeartGlow && window.triggerHeartGlow();
+
+        // 3. Confetti
+        setTimeout(launchConfetti, 400);
+
+        // 4. Fireworks
+        setTimeout(launchFireworks, 600);
+
+        // 5. Show success message
+        setTimeout(() => {
+          document.getElementById("btns").style.display = "none";
+          document.getElementById("question").style.display = "none";
+          const msg = document.getElementById("success-msg");
+          msg.style.display = "block";
+        }, 800);
+      }
+
+      /* ================================================================
+   6. BUTTON: NO — runs away on hover/touch
+================================================================ */
+      (function initNoButton() {
+        const btn = document.getElementById("btn-no");
+        let locked = false;
+
+        function runAway(e) {
+          if (locked) return;
+
+          const bRect = btn.getBoundingClientRect();
+          const bodyW = document.body.clientWidth;
+          const bodyH = document.body.clientHeight;
+          const margin = 80;
+
+          let newX, newY;
+          let attempts = 0;
+
+          do {
+            newX = margin + Math.random() * (bodyW - bRect.width - margin * 2);
+            newY = margin + Math.random() * (bodyH - bRect.height - margin * 2);
+            attempts++;
+          } while (
+            attempts < 20 &&
+            Math.abs(newX - bRect.left) < 100 &&
+            Math.abs(newY - bRect.top) < 100
+          );
+
+          btn.style.position = "fixed";
+          btn.style.transition = "left 0.25s ease, top 0.25s ease";
+          btn.style.left = newX + "px";
+          btn.style.top = newY + "px";
+          // Remove from flow
+          btn.style.zIndex = "9999";
+        }
+
+        btn.addEventListener("mouseover", runAway);
+        btn.addEventListener("touchstart", runAway, { passive: true });
+        btn.addEventListener("click", (e) => e.preventDefault());
+      })();
+
+      /* ================================================================
+   7. SCREEN FLASH
+================================================================ */
+      function flashScreen() {
+        const flash = document.getElementById("flash");
+        flash.style.transition = "opacity 0.3s ease";
+        flash.style.opacity = "1";
+        setTimeout(() => {
+          flash.style.transition = "opacity 1.8s ease";
+          flash.style.opacity = "0";
+        }, 300);
+      }
+
+      /* ================================================================
+   8. CONFETTI
+================================================================ */
+      (function setupConfetti() {
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener("resize", () => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        });
+
+        const COLORS = [
+          "#f43f5e",
+          "#ec4899",
+          "#a855f7",
+          "#7b2ff7",
+          "#06b6d4",
+          "#fbbf24",
+          "#34d399",
+        ];
+        let pieces = [];
+        let running = false;
+
+        class Piece {
+          constructor() {
+            this.reset(true);
+          }
+
+          reset(init = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = init ? Math.random() * canvas.height - canvas.height : -10;
+            this.vx = (Math.random() - 0.5) * 4;
+            this.vy = Math.random() * 3 + 2;
+            this.r = Math.random() * 6 + 3;
+            this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            this.spin = (Math.random() - 0.5) * 0.25;
+            this.angle = Math.random() * Math.PI * 2;
+            this.shape =
+              Math.random() < 0.4
+                ? "circle"
+                : Math.random() < 0.7
+                  ? "rect"
+                  : "heart";
+          }
+
+          update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.angle += this.spin;
+            if (this.y > canvas.height + 20) this.reset();
+          }
+
+          draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = this.color;
+            ctx.globalAlpha = 0.9;
+
+            if (this.shape === "circle") {
+              ctx.beginPath();
+              ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+              ctx.fill();
+            } else if (this.shape === "rect") {
+              ctx.fillRect(-this.r, -this.r * 0.5, this.r * 2, this.r);
+            } else {
+              // Mini heart
+              const s = this.r * 0.1;
+              ctx.beginPath();
+              ctx.moveTo(0, this.r * 0.5);
+              ctx.bezierCurveTo(
+                this.r,
+                -this.r * 0.5,
+                this.r * 2,
+                this.r,
+                0,
+                this.r * 2,
+              );
+              ctx.bezierCurveTo(
+                -this.r * 2,
+                this.r,
+                -this.r,
+                -this.r * 0.5,
+                0,
+                this.r * 0.5,
+              );
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+        }
+
+        function loop() {
+          if (!running) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (const p of pieces) {
+            p.update();
+            p.draw();
+          }
+          requestAnimationFrame(loop);
+        }
+
+        window.launchConfetti = function () {
+          if (running) return;
+          running = true;
+          pieces = Array.from({ length: 180 }, () => new Piece());
+          loop();
+          setTimeout(() => {
+            running = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }, 7000);
+        };
+      })();
+
+      /* ================================================================
+   9. FIREWORKS — Canvas-based
+================================================================ */
+      (function setupFireworks() {
+        // We'll draw fireworks on the confetti canvas (reuse)
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+
+        const COLORS = [
+          "#f43f5e",
+          "#ec4899",
+          "#a855f7",
+          "#7b2ff7",
+          "#fbbf24",
+          "#34d399",
+          "#60a5fa",
+        ];
+        let particles = [];
+
+        class Spark {
+          constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 8;
+            this.vy = (Math.random() - 0.5) * 8 - 3;
+            this.color = color;
+            this.life = 1;
+            this.decay = 0.015 + Math.random() * 0.02;
+            this.r = 2 + Math.random() * 2;
+          }
+
+          update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1;
+            this.life -= this.decay;
+          }
+
+          draw() {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, this.life);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = this.color;
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+
+        function burst(x, y) {
+          const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+          for (let i = 0; i < 80; i++) {
+            particles.push(new Spark(x, y, color));
+          }
+        }
+
+        let fwRunning = false;
+
+        function fwLoop() {
+          if (!fwRunning) return;
+          particles = particles.filter((p) => p.life > 0);
+          for (const p of particles) {
+            p.update();
+            p.draw();
+          }
+          requestAnimationFrame(fwLoop);
+        }
+
+        window.launchFireworks = function () {
+          fwRunning = true;
+          fwLoop();
+          const W = canvas.width,
+            H = canvas.height;
+          let count = 0;
+          const id = setInterval(() => {
+            burst(
+              W * 0.2 + Math.random() * W * 0.6,
+              H * 0.1 + Math.random() * H * 0.5,
+            );
+            count++;
+            if (count > 12) {
+              clearInterval(id);
+              setTimeout(() => {
+                fwRunning = false;
+              }, 3000);
+            }
+          }, 350);
+        };
+      })();
+
+      /* ================================================================
+   10. AUDIO AUTO-PLAY
+================================================================ */
+      (function initAudio() {
+        const audio = document.getElementById("bg-music");
+        audio.volume = 0.55;
+
+        // Modern browsers block autoplay until user gesture
+        const tryPlay = () => {
+          audio.play().catch(() => {});
+        };
+
+        // Try on load
+        window.addEventListener("load", tryPlay);
+
+        // Also try on first interaction
+        document.addEventListener("click", tryPlay, { once: true });
+        document.addEventListener("touchstart", tryPlay, {
+          once: true,
+          passive: true,
+        });
+      })();
+    </script>
+  </body>
+</html>
